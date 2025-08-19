@@ -4,7 +4,7 @@ import torch
 import os
 
 # 2. 모델 경로와 기본 모델 이름을 지정합니다.
-model_directory = "./fine_tunning/fine_tuned_model"
+model_directory = "./fine_tuned_model"
 base_model_name = "distilbert-base-uncased" # 파인튜닝에 사용된 기본 모델
 
 print(f"파인튜닝된 모델 디렉토리: {os.path.abspath(model_directory)}")
