@@ -26,10 +26,10 @@ tokenizer.padding_side = "right"
 
 # LoRA 설정
 lora_config = LoraConfig(
-    r=16,
-    lora_alpha=32,
-    lora_dropout=0.1,
-    bias="none",
+    r=16, # LoRA rank 추가 차원수 (높으면 성능은 좋지만 메모리 소모가 큼)
+    lora_alpha=32, # 병합시 곱해지는 스케일링 팩터(높으면 성능은 좋지만 메모리 소모가 큼)
+    lora_dropout=0.3, # LoRA dropout 비율 과적합 방지율 (0.1~0.2 정도가 일반적)
+    bias="none", # 편향 학습 여부 (none, lora_only, all)
     task_type=TaskType.CAUSAL_LM,
 )
 
@@ -50,15 +50,15 @@ bf16_ok = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
 fp16_ok = torch.cuda.is_available() and not bf16_ok
 
 training_params = TrainingArguments(
-    num_train_epochs=1,
-    max_steps=30,
-    per_device_train_batch_size=1,
-    gradient_accumulation_steps=4,
-    optim=optim_name,
+    num_train_epochs=1, # 데이터 세트 반복 획수
+    max_steps=30, # 총 합습 스텝수
+    per_device_train_batch_size=1, # GPU당 배치 사이즈
+    gradient_accumulation_steps=4, # 배치 사이즈를 늘리기 위한 그래디언트 누적 스텝수ㅏ, 실제 배치 크기는 batch_size * gradient_accumulation_steps
+    optim=optim_name, # 최적화 알고리즘
     warmup_ratio=0.03,
-    learning_rate=2e-4,
-    lr_scheduler_type="cosine",
-    weight_decay=0.01,
+    learning_rate=2e-4, # 옵티마이저 기본 학습률
+    lr_scheduler_type="cosine", # 학습률 변화 방식, cosine은 코사인 형태로 학습률이 감소함
+    weight_decay=0.1, # 가중치 감소율, 일반적으로 0.01~0.1 사이 과적합 방지용
     bf16=bf16_ok,
     fp16=fp16_ok,
     gradient_checkpointing=True,
