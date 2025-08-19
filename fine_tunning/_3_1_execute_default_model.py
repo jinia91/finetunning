@@ -32,7 +32,63 @@ terminators = [
 
 outputs = pipeline(
     prompt,
-    max_new_tokens=50,
+    max_new_tokens=200,
+    do_sample=True,
+    temperature=0.1,
+    top_p=0.9
+)
+
+print(outputs[0]["generated_text"][len(prompt):])
+
+
+
+messages = [
+    {"role": "system", "content": "한국어로 짧고 정확하게만 답하세요."},
+    {"role": "user", "content": "바다는 왜 파란가요?"}
+]
+
+prompt = pipeline.tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True
+)
+
+terminators = [
+    pipeline.tokenizer.eos_token_id,
+    pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>")
+]
+
+outputs = pipeline(
+    prompt,
+    max_new_tokens=200,
+    do_sample=True,
+    temperature=0.1,
+    top_p=0.9
+)
+
+print(outputs[0]["generated_text"][len(prompt):])
+
+
+
+messages = [
+    {"role": "system", "content": "한국어로 짧고 정확하게만 답하세요."},
+    {"role": "user", "content": "옆집 강아지 이름은?"}
+]
+
+prompt = pipeline.tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True
+)
+
+terminators = [
+    pipeline.tokenizer.eos_token_id,
+    pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>")
+]
+
+outputs = pipeline(
+    prompt,
+    max_new_tokens=200,
     do_sample=True,
     temperature=0.1,
     top_p=0.9

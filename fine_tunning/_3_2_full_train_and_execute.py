@@ -1,8 +1,10 @@
 import torch
 from datasets import Dataset
+from sympy.core.evalf import evalf_prod
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments
 from peft import LoraConfig, TaskType
 from trl import SFTTrainer
+import numpy as np
 
 # 모델 로드
 model_id = "MLP-KTLim/llama-3-Korean-Bllossom-8B"
@@ -49,7 +51,7 @@ fp16_ok = torch.cuda.is_available() and not bf16_ok
 
 training_params = TrainingArguments(
     num_train_epochs=1,
-    max_steps=100,
+    max_steps=30,
     per_device_train_batch_size=1,
     gradient_accumulation_steps=4,
     optim=optim_name,
@@ -61,7 +63,7 @@ training_params = TrainingArguments(
     fp16=fp16_ok,
     gradient_checkpointing=True,
     remove_unused_columns=False,
-    logging_steps=100,
+    logging_steps=1,
     save_steps=100,
     save_total_limit=2,
     push_to_hub=False,
@@ -87,7 +89,7 @@ peft_model.eval()
 
 # 2) Llama-3 채팅 템플릿 사용
 messages = [
-    {"role": "system", "content": "한국어로 짧고 정확하게만 답하세요."},
+    {"role": "system", "content": "한국어로 짧고 정확하게만 답하세요. 모르면 모른다고 해라"},
     {"role": "user", "content": "우리집 강아지 이름은?"}
 ]
 inputs = tokenizer.apply_chat_template(
@@ -112,7 +114,7 @@ print(tokenizer.decode(gen_only, skip_special_tokens=True).strip())
 # 다른 질문 해보기 바다는 왜 파란가요?
 
 messages = [
-    {"role": "system", "content": "한국어로 짧고 정확하게만 답하세요."},
+    {"role": "system", "content": "한국어로 짧고 정확하게만 답하세요. 모르면 모른다고 해라"},
     {"role": "user", "content": "바다는 왜 파란가요?"}
 ]
 
@@ -130,4 +132,28 @@ outputs = peft_model.generate(
 # 프롬프트 부분을 잘라 답변만 출력
 gen_only = outputs[0, inputs.shape[-1]:]
 print(tokenizer.decode(gen_only, skip_special_tokens=True).strip())
+
+
+# 과적합체크
+
+messages = [
+    {"role": "system", "content": "한국어로 짧고 정확하게만 답하세요. 모르면 모른다고 해라"},
+    {"role": "user", "content": "옆집 강아지 이름은?"}
+]
+
+inputs = tokenizer.apply_chat_template(
+    messages, add_generation_prompt=True, return_tensors="pt"
+).to(peft_model.device)
+
+outputs = peft_model.generate(
+    inputs,
+    max_new_tokens=32,
+    do_sample=False,
+    eos_token_id=eos
+)
+
+# 프롬프트 부분을 잘라 답변만 출력
+gen_only = outputs[0, inputs.shape[-1]:]
+print(tokenizer.decode(gen_only, skip_special_tokens=True).strip())
+
 

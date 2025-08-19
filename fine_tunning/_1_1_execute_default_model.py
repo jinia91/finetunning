@@ -2,6 +2,8 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 import os
 
+print("튜닝 하지 않은 순정모델 테스트")
+
 try:
     # 토크나이저는 기본 모델에서 직접 로드합니다.
     print("토크나이저를 로드하는 중...")
