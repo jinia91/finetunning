@@ -15,7 +15,6 @@ model = AutoModelForCausalLM.from_pretrained(
     device_map="auto",
     low_cpu_mem_usage=True,
 )
-model.eval() # 평가 모드로 설정
 
 
 # 토크나이저 로드 및 설정
